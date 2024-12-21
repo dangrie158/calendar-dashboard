@@ -16,7 +16,7 @@ export default function Calendar({ resetDimTimeout }: { resetDimTimeout: () => v
             // If there is an event in the future, reset the dim timeout
             resetDimTimeout();
         }
-    }, [data, resetDimTimeout]);
+    }, [data]);
 
     const dateToLocale = (date: Date) => {
         const weekDay = date.toLocaleString(undefined, { weekday: "long" });
