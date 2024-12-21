@@ -30,6 +30,7 @@
   border-radius: 5px;
   min-height: 38px;
   font-size: 18px;
+  backdrop-filter: blur(5px);
 }
 
 .event span:nth-child(1) {

@@ -4,6 +4,7 @@ import { Router } from "jsr:@oak/oak/router";
 import routeStaticFilesFrom from "./util/routeStaticFilesFrom.ts";
 import * as events from "./events.ts";
 import * as weather from "./weather.ts";
+import * as wallpaper from "./wallpaper.ts";
 
 export const app = new Application();
 const router = new Router();
@@ -18,6 +19,7 @@ app.use(routeStaticFilesFrom([`${Deno.cwd()}/client/dist`, `${Deno.cwd()}/client
 
 router.get("/events", events.get);
 router.get("/weather", weather.get);
+router.get("/wallpaper", wallpaper.get);
 
 if (import.meta.main) {
     console.log("Server listening on port http://localhost:8000");
