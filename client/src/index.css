@@ -1,19 +1,19 @@
 * {
-  box-sizing: border-box;
-  user-select: none;
-  /* cursor: none; */
+    box-sizing: border-box;
+    user-select: none;
+    cursor: none;
 }
 
 body {
-  margin: 0;
-  font-family: "Raleway", sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background: #000;
-  color: #fff;
+    margin: 0;
+    font-family: "Raleway", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background: #000;
+    color: #fff;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-    monospace;
+    font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+        monospace;
 }

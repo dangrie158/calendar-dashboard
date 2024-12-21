@@ -1,15 +1,28 @@
+import { re } from "../../../../Library/Caches/deno/npm/registry.npmjs.org/semver/6.3.1/semver.js";
+
 const request_cache = await caches.open("request-cache");
 const DEFAULT_LIFETIME = 1000 * 60 * 15;
+
 export default async function cachedFetch(
     url: string,
     options?: RequestInit & { cacheLifetime?: number }
 ): Promise<Response> {
-    let response = await request_cache.match(url);
-    if (!response) {
+    let response: Response | undefined = await request_cache.match(url);
+    // check if the response is expired
+    if (response) {
+        const expires = new Date(response.headers.get("Expires")!);
+        if (expires < new Date()) {
+            response = undefined;
+            request_cache.delete(url);
+        }
+    }
+
+    if (response === undefined) {
+        console.log(`Cache miss for ${url}, refetching`);
         response = await fetch(url, options);
-        console.log(`Fetching ${url} from network`);
         response = new Response(await response.text(), {
             headers: {
+                ...response.headers,
                 Expires: new Date(Date.now() + (options?.cacheLifetime ?? DEFAULT_LIFETIME)).toUTCString(),
             },
         });

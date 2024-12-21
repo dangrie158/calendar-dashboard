@@ -1,16 +1,23 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import "./app.css";
 
 import Wallpaper from "./wallpaper.tsx";
 import Calendar from "./calendar.tsx";
 import Weather from "./weather.tsx";
 import Time from "./time.tsx";
+import { fetcher } from "../backend.tsx";
+import useSWR from "swr";
+import { BrightnessResponse } from "../../../server/brightness.ts";
 
 const DIM_TIMEOUT = 1000 * 60 * 5;
 
 export default function App() {
     const [dim, setDim] = useState(false);
     const [dimTimeout, setDimTimeout] = useState<NodeJS.Timeout | undefined>(undefined);
+    const { data: brightnessConfig } = useSWR<BrightnessResponse>("brightness", fetcher, {
+        refreshInterval: 1000 * 60,
+        keepPreviousData: true,
+    });
     const resetDimTimeout = useCallback(() => {
         if (dimTimeout !== undefined) {
             clearTimeout(dimTimeout);
@@ -21,7 +28,7 @@ export default function App() {
         setDimTimeout(
             setTimeout(() => {
                 const hour = new Date().getHours();
-                if (hour >= 9 && hour < 18) {
+                if (hour >= (brightnessConfig?.dimbefore ?? 4) && hour < (brightnessConfig?.dimafter ?? 20)) {
                     resetDimTimeout();
                     return;
                 }
@@ -30,6 +37,10 @@ export default function App() {
             }, DIM_TIMEOUT)
         );
     }, [dimTimeout]);
+
+    useEffect(() => {
+        fetcher("brightness", { method: "PUT", body: JSON.stringify({ dim: dim }) });
+    }, [dim]);
 
     return (
         <div className="app">

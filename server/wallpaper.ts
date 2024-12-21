@@ -1,7 +1,6 @@
 import { Context } from "@oak/oak/context";
-import { wallpaper } from "../config.ts";
+import { wallpaper as config } from "../config.ts";
 import cachedFetch from "./util/cachedFetch.ts";
-import { tsNamedTupleMember } from "../../../Library/Caches/deno/npm/registry.npmjs.org/@babel/types/7.26.0/lib/index-legacy.d.ts";
 type Photo = {
     photoGuid: string;
     derivatives: {
@@ -79,7 +78,7 @@ async function getIcloudAlbumImages(sharedUrl: URL): Promise<WallpaperResponse> 
 
 export async function get(context: Context) {
     const imageUrls = [];
-    for (const album of wallpaper.icloud) {
+    for (const album of config.icloudalbums) {
         const sharedUrl = new URL(album);
         imageUrls.push(...(await getIcloudAlbumImages(sharedUrl)));
     }

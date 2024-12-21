@@ -43,7 +43,7 @@ export default function Wallpaper() {
             await front.animate(animation, { easing: "ease-in-out", duration: 20000, fill: "both" }).finished;
             await Promise.all([
                 front.animate([{ opacity: 0 }], { duration: 2000, fill: "both" }).finished,
-                back.animate({ opacity: 1 }, { duration: 2000, fill: "both" }).finished,
+                back.animate({ opacity: 0.8 }, { duration: 2000, fill: "both" }).finished,
             ]);
             back.style.zIndex = "-1";
             front.style.zIndex = "-2";
