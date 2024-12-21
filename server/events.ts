@@ -3,46 +3,14 @@ import ical from "ical";
 import { RRule } from "rrule";
 
 import { calendars } from "../config.ts";
-
-type Calendar = {
-    name: string;
-    url: string;
-    color: string;
-};
-
-type ICalEvent = {
-    uid: string;
-    start: Date;
-    end: Date;
-    summary: { val: string } | string;
-    rrule: RRule;
-    recurrences: { [key: string]: { start_date: Date } };
-};
-
-type Event = {
-    uuid: string;
-    start: string;
-    end: string;
-    summary: string;
-    calendar: string;
-    color: string;
-};
-
-export type EventResponse = Event[];
-
-const request_cache = await caches.open("events-cache");
+import cachedFetch from "./util/cachedFetch.ts";
 
 export async function get(context: Context) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
     const relevant_event_promises = calendars.flatMap(async (calendar: Calendar) => {
-        let response = await request_cache.match(calendar.url);
-        if (!response) {
-            response = await fetch(calendar.url);
-            console.log("Fetching calendar", calendar.url);
-            request_cache.put(calendar.url, response.clone());
-        }
+        const response = await cachedFetch(calendar.url, { cacheLifetime: 1000 * 60 * 15 });
         const calendarData = await response.text();
         const allEvents = ical.parseICS(calendarData) as ICalEvent[];
 
@@ -78,3 +46,29 @@ export async function get(context: Context) {
         .slice(0, 20);
     context.response.body = (await Promise.all(relevant_events)).flat();
 }
+
+type Calendar = {
+    name: string;
+    url: string;
+    color: string;
+};
+
+type ICalEvent = {
+    uid: string;
+    start: Date;
+    end: Date;
+    summary: { val: string } | string;
+    rrule: RRule;
+    recurrences: { [key: string]: { start_date: Date } };
+};
+
+type Event = {
+    uuid: string;
+    start: string;
+    end: string;
+    summary: string;
+    calendar: string;
+    color: string;
+};
+
+export type EventResponse = Event[];

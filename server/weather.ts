@@ -1,56 +1,35 @@
 import { Context } from "@oak/oak/context";
 import { weather as weatherConfig } from "../config.ts";
-type WeatherInfo = {
-    temperature_2m: number;
-    relativehumidity_2m: number;
-    weathercode: number;
-};
+import cachedFetch from "./util/cachedFetch.ts";
 
-type Daily = {
-    max: WeatherInfo;
-    min: WeatherInfo;
-    date: Date;
-};
+export async function get(context: Context) {
+    const { latitude, longitude } = weatherConfig;
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relativehumidity_2m,weathercode&hourly=temperature_2m,relativehumidity_2m,weathercode&timeformat=unixtime&timezone=GMT&forecast_days=3`;
+    const response = await cachedFetch(url, { cacheLifetime: 1000 * 60 * 15 });
+    const weatherData: MeteoResponse = await response.json();
 
-type MeteoUnitResponse = {
-    time: string;
-    interval: string;
-    temperature_2m: string;
-    relativehumidity_2m: string;
-    weathercode: string;
-};
+    const dailyData = aggregateDaily(weatherData.hourly);
 
-type MeteoResponse = {
-    latitude: number;
-    longitude: number;
-    current_units: MeteoUnitResponse;
-    current: {
-        time: number;
-        interval: number;
-        temperature_2m: number;
-        relativehumidity_2m: number;
-        weathercode: number;
+    context.response.body = {
+        current: formatWeatherInfo(weatherData.current, weatherData.current_units),
+        daily: Object.values(dailyData).map((day) => {
+            return {
+                date: day.date,
+                max: formatWeatherInfo(day.max, weatherData.hourly_units),
+                min: formatWeatherInfo(day.min, weatherData.hourly_units),
+            };
+        }),
     };
-    hourly_units: MeteoUnitResponse;
-    hourly: {
-        time: number[];
-        temperature_2m: number[];
-        relativehumidity_2m: number[];
-        weathercode: number[];
+}
+
+function formatWeatherInfo(info: WeatherInfo, units: MeteoUnitResponse) {
+    return {
+        temperature: `${Math.round(info.temperature_2m)} ${units.temperature_2m}`,
+        humidity: `${Math.round(info.relativehumidity_2m)} ${units.relativehumidity_2m}`,
+        weathercode: info.weathercode,
     };
-};
+}
 
-type FormattedWeatherData = {
-    temperature: string;
-    humidity: string;
-    weathercode: number;
-};
-export type WeatherResponse = {
-    current: FormattedWeatherData;
-    daily: { date: string; max: FormattedWeatherData; min: FormattedWeatherData }[];
-};
-
-const request_cache = await caches.open("weather-cache");
 function aggregateDaily(data: MeteoResponse["hourly"]) {
     return data.time.reduce((acc: Record<string, Daily>, timeStamp: number, index: number) => {
         const time = new Date(timeStamp * 1000).toLocaleString(undefined, {
@@ -91,35 +70,51 @@ function aggregateDaily(data: MeteoResponse["hourly"]) {
     }, {}) as Record<string, Daily>;
 }
 
-function formatWeatherInfo(info: WeatherInfo, units: MeteoUnitResponse) {
-    return {
-        temperature: `${Math.round(info.temperature_2m)} ${units.temperature_2m}`,
-        humidity: `${Math.round(info.relativehumidity_2m)} ${units.relativehumidity_2m}`,
-        weathercode: info.weathercode,
+type FormattedWeatherData = {
+    temperature: string;
+    humidity: string;
+    weathercode: number;
+};
+export type WeatherResponse = {
+    current: FormattedWeatherData;
+    daily: { date: string; max: FormattedWeatherData; min: FormattedWeatherData }[];
+};
+type WeatherInfo = {
+    temperature_2m: number;
+    relativehumidity_2m: number;
+    weathercode: number;
+};
+
+type Daily = {
+    max: WeatherInfo;
+    min: WeatherInfo;
+    date: Date;
+};
+
+type MeteoUnitResponse = {
+    time: string;
+    interval: string;
+    temperature_2m: string;
+    relativehumidity_2m: string;
+    weathercode: string;
+};
+
+type MeteoResponse = {
+    latitude: number;
+    longitude: number;
+    current_units: MeteoUnitResponse;
+    current: {
+        time: number;
+        interval: number;
+        temperature_2m: number;
+        relativehumidity_2m: number;
+        weathercode: number;
     };
-}
-
-export async function get(context: Context) {
-    const { latitude, longitude } = weatherConfig;
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relativehumidity_2m,weathercode&hourly=temperature_2m,relativehumidity_2m,weathercode&timeformat=unixtime&timezone=GMT&forecast_days=3`;
-    let response = await request_cache.match(url);
-    if (!response) {
-        response = await fetch(url);
-        console.log("Fetching weather data");
-        request_cache.put(url, response.clone());
-    }
-    const weatherData: MeteoResponse = await response.json();
-
-    const dailyData = aggregateDaily(weatherData.hourly);
-
-    context.response.body = {
-        current: formatWeatherInfo(weatherData.current, weatherData.current_units),
-        daily: Object.values(dailyData).map((day) => {
-            return {
-                date: day.date,
-                max: formatWeatherInfo(day.max, weatherData.hourly_units),
-                min: formatWeatherInfo(day.min, weatherData.hourly_units),
-            };
-        }),
+    hourly_units: MeteoUnitResponse;
+    hourly: {
+        time: number[];
+        temperature_2m: number[];
+        relativehumidity_2m: number[];
+        weathercode: number[];
     };
-}
+};
