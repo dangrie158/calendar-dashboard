@@ -1,0 +1,12 @@
+.time {
+  position: absolute;
+  top: 30px;
+  right: 40px;
+  font-size: 70px;
+  z-index: 1000;
+  color: #fff;
+}
+
+.time.t-dim {
+  color: #ea1d06;
+}
