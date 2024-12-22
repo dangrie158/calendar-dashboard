@@ -6,6 +6,6 @@
     bottom: 0;
     z-index: -1;
     opacity: 1;
-    background: url("bg.jpg") no-repeat center;
+    background: url("default_bg.jpg") no-repeat center;
     background-size: cover;
 }

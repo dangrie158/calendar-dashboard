@@ -23,7 +23,7 @@
 .event {
   display: flex;
   align-items: center;
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: rgba(0, 0, 0, 0.4);
   padding: 10px 10px 10px 12px;
   position: relative;
   overflow: hidden;
