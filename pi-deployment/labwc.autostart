@@ -1,0 +1,2 @@
+/usr/bin/kanshi &
+/usr/bin/lwrespawn /usr/bin/chromium-browser --app=http://localhost:8000/ --kiosk --start-fullscreen --start-maximized --fast --fast-start --no-first-run --noerrdialogs --disable-translate --disable-notifications --disable-infobars --disable-pinch --disable-features=TranslateUI --disk-cache-dir=/dev/null --ozone-platform=wayland --enable-features=OverlayScrollbar

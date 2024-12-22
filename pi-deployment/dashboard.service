@@ -1,0 +1,13 @@
+[Unit]
+Description=Dashboard Service
+Wants=network-online.target
+After=network-online.target
+[Service]
+Type=simple
+User=griesshaber
+WorkingDirectory=/home/griesshaber/dashboard/
+ExecStart=/home/griesshaber/.deno/bin/deno run --allow-net --allow-read server:start
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
