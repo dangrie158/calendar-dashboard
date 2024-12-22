@@ -22,7 +22,15 @@ export async function get(context: Context) {
             }
 
             const duration = event.end.getTime() - event.start.getTime();
-            const recurrence_change = event.recurrences?.[startDate.toISOString().split("T")[0]];
+            const eventDate = startDate.toISOString().split("T")[0];
+
+            // check if the event is excluded on this date
+            if (event.exdate?.[eventDate] !== undefined) {
+                return null;
+            }
+
+            // check if the event has a recurrence change on this date
+            const recurrence_change = event.recurrences?.[eventDate];
             if (recurrence_change !== undefined) {
                 startDate = recurrence_change.start_date;
             }
@@ -59,7 +67,8 @@ type ICalEvent = {
     end: Date;
     summary: { val: string } | string;
     rrule: RRule;
-    recurrences: { [key: string]: { start_date: Date } };
+    recurrences: { [date: string]: { start_date: Date } };
+    exdate: { [date: string]: string };
 };
 
 type Event = {

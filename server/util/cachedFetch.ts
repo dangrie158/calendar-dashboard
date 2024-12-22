@@ -1,5 +1,3 @@
-import { re } from "../../../../Library/Caches/deno/npm/registry.npmjs.org/semver/6.3.1/semver.js";
-
 const request_cache = await caches.open("request-cache");
 const DEFAULT_LIFETIME = 1000 * 60 * 15;
 
