@@ -52,5 +52,5 @@ The backend server uses Deno and the Oak framework to serve the built React app.
 To start the backend server, run the following command:
 
 ```sh
-deno run serve
+deno run server:debug
 ```

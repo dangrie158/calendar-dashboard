@@ -27,17 +27,20 @@ app.use((ctx, next) => {
     );
     return next();
 });
-app.use((ctx, next) => {
-    // allow CORS
-    ctx.response.headers.set("Access-Control-Allow-Origin", "*");
-    ctx.response.headers.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
-    if (ctx.request.method === "OPTIONS") {
-        ctx.response.body = "";
-        ctx.response.status = 200;
-        return;
-    }
-    return next();
-});
+
+if (Deno.env.get("DEBUG") === "true") {
+    app.use((ctx, next) => {
+        // allow CORS
+        ctx.response.headers.set("Access-Control-Allow-Origin", "*");
+        ctx.response.headers.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+        if (ctx.request.method === "OPTIONS") {
+            ctx.response.body = "";
+            ctx.response.status = 200;
+            return;
+        }
+        return next();
+    });
+}
 
 app.use(router.routes());
 app.use(routeStaticFilesFrom([`${Deno.cwd()}/client/dist`, `${Deno.cwd()}/client/public`]));
