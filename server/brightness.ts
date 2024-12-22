@@ -28,8 +28,8 @@ async function writeBrightnessValue(name: "brightness" | "max_brightness", value
 }
 
 export async function put(context: Context) {
+    context.response.body = "{}";
     if (brightnessDevice === undefined) {
-        context.response.body = "";
         return;
     }
 
